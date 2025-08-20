@@ -110,17 +110,21 @@
 
 {% block scripts %}
 <script>
-// AFL Fixtures data for display
-const AFL_FIXTURES = [
-    { id: 1, home_team: 'Richmond', away_team: 'Collingwood', venue: 'MCG' },
-    { id: 2, home_team: 'Adelaide', away_team: 'Port Adelaide', venue: 'Adelaide Oval' },
-    { id: 3, home_team: 'Brisbane', away_team: 'Gold Coast', venue: 'Gabba' },
-    { id: 4, home_team: 'Geelong', away_team: 'Carlton', venue: 'GMHBA Stadium' },
-    { id: 5, home_team: 'Western Bulldogs', away_team: 'Melbourne', venue: 'Marvel Stadium' },
-    { id: 6, home_team: 'Sydney', away_team: 'GWS Giants', venue: 'SCG' },
-    { id: 7, home_team: 'West Coast', away_team: 'Fremantle', venue: 'Optus Stadium' },
-    { id: 8, home_team: 'St Kilda', away_team: 'Essendon', venue: 'Marvel Stadium' }
-];
+// AFL Fixtures data loaded from API
+let AFL_FIXTURES = [];
+
+// Load fixtures from API on page load
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        const response = await fetch('/api/fixtures');
+        const fixtures = await response.json();
+        AFL_FIXTURES = fixtures;
+    } catch (error) {
+        console.error('Error loading fixtures:', error);
+        // Fallback to empty array if API fails
+        AFL_FIXTURES = [];
+    }
+});
 
 document.getElementById('decryptForm').addEventListener('submit', function(e) {
     e.preventDefault();

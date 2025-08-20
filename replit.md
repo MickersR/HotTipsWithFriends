@@ -52,10 +52,19 @@ Preferred communication style: Simple, everyday language.
 - **Python Logging**: Built-in logging configuration for debugging
 - **Environment Variables**: Configuration through environment variables for deployment flexibility
 
-### Mock Data
-- **AFL Fixtures**: Hardcoded fixture data for current implementation (designed to be replaced with external AFL API)
+### Web Scraping Integration
+- **AFL Fixtures**: Real-time fixture data scraped from austadiums.com using Trafilatura
+- **Caching System**: 12-hour cache to minimize excessive requests to external source
+- **Fallback System**: Automatic fallback to generated fixture data if scraping fails
+- **Data Processing**: Intelligent parsing of team names, venues, dates, and times from scraped content
+
+### Recent Changes (August 2025)
+- **Removed Feature Marketing**: Cleaned up home page by removing feature advertisements and "How It Works" sections per user request
+- **Implemented Live Data**: Replaced mock AFL fixtures with real-time web scraping from austadiums.com
+- **Added Web Scraper**: Created comprehensive scraper with team name standardization and venue recognition
+- **Enhanced Caching**: Implemented smart caching system to balance data freshness with performance
 
 ### Future Integration Opportunities
-- AFL official API for live fixture data
 - Database migration to PostgreSQL for production
 - External authentication providers if needed
+- Enhanced scraping with additional AFL data sources

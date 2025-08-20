@@ -1,75 +1,38 @@
 from flask import render_template, request, jsonify, flash, redirect, url_for
 from app import app, db
 from models import Tip
+from web_scraper import scrape_afl_fixtures
 import json
+import logging
 
-# Mock AFL fixture data for current round
-AFL_FIXTURES = [
-    {
-        'id': 1,
-        'home_team': 'Richmond',
-        'away_team': 'Collingwood',
-        'venue': 'MCG',
-        'date': '2025-08-23',
-        'time': '19:50'
-    },
-    {
-        'id': 2,
-        'home_team': 'Adelaide',
-        'away_team': 'Port Adelaide',
-        'venue': 'Adelaide Oval',
-        'date': '2025-08-24',
-        'time': '13:45'
-    },
-    {
-        'id': 3,
-        'home_team': 'Brisbane',
-        'away_team': 'Gold Coast',
-        'venue': 'Gabba',
-        'date': '2025-08-24',
-        'time': '16:35'
-    },
-    {
-        'id': 4,
-        'home_team': 'Geelong',
-        'away_team': 'Carlton',
-        'venue': 'GMHBA Stadium',
-        'date': '2025-08-24',
-        'time': '19:25'
-    },
-    {
-        'id': 5,
-        'home_team': 'Western Bulldogs',
-        'away_team': 'Melbourne',
-        'venue': 'Marvel Stadium',
-        'date': '2025-08-25',
-        'time': '13:20'
-    },
-    {
-        'id': 6,
-        'home_team': 'Sydney',
-        'away_team': 'GWS Giants',
-        'venue': 'SCG',
-        'date': '2025-08-25',
-        'time': '15:20'
-    },
-    {
-        'id': 7,
-        'home_team': 'West Coast',
-        'away_team': 'Fremantle',
-        'venue': 'Optus Stadium',
-        'date': '2025-08-25',
-        'time': '18:10'
-    },
-    {
-        'id': 8,
-        'home_team': 'St Kilda',
-        'away_team': 'Essendon',
-        'venue': 'Marvel Stadium',
-        'date': '2025-08-25',
-        'time': '20:10'
-    }
-]
+logger = logging.getLogger(__name__)
+
+# Cache for AFL fixtures to avoid excessive scraping
+_afl_fixtures_cache = None
+_cache_timestamp = None
+
+def get_afl_fixtures():
+    """Get AFL fixtures with caching"""
+    global _afl_fixtures_cache, _cache_timestamp
+    
+    from datetime import datetime, timedelta
+    
+    # Check if cache is valid (refresh daily)
+    now = datetime.now()
+    if _cache_timestamp and _afl_fixtures_cache:
+        if now - _cache_timestamp < timedelta(hours=12):  # Cache for 12 hours
+            return _afl_fixtures_cache
+    
+    # Scrape fresh data
+    logger.info("Fetching fresh AFL fixtures from austadiums.com")
+    fixtures = scrape_afl_fixtures()
+    
+    if fixtures:
+        _afl_fixtures_cache = fixtures
+        _cache_timestamp = now
+        logger.info(f"Cached {len(fixtures)} AFL fixtures")
+    
+    return fixtures or []
 
 @app.route('/')
 def index():
@@ -79,7 +42,8 @@ def index():
 @app.route('/submit-tips')
 def submit_tips():
     """Display the tip submission form"""
-    return render_template('submit_tips.html', fixtures=AFL_FIXTURES)
+    fixtures = get_afl_fixtures()
+    return render_template('submit_tips.html', fixtures=fixtures)
 
 @app.route('/view-tips')
 def view_tips():
@@ -89,7 +53,8 @@ def view_tips():
 @app.route('/api/fixtures')
 def get_fixtures():
     """API endpoint to get current AFL fixtures"""
-    return jsonify(AFL_FIXTURES)
+    fixtures = get_afl_fixtures()
+    return jsonify(fixtures)
 
 @app.route('/process-tips', methods=['POST'])
 def process_tips():
