@@ -60,9 +60,10 @@ Preferred communication style: Simple, everyday language.
 
 ### Recent Changes (August 2025)
 - **Removed Feature Marketing**: Cleaned up home page by removing feature advertisements and "How It Works" sections per user request
-- **Implemented Live Data**: Replaced mock AFL fixtures with real-time web scraping from austadiums.com
-- **Added Web Scraper**: Created comprehensive scraper with team name standardization and venue recognition
-- **Enhanced Caching**: Implemented smart caching system to balance data freshness with performance
+- **Implemented Live Data**: Replaced mock AFL fixtures with real Squiggle API integration after web scraping failed
+- **API Integration**: Successfully integrated with Squiggle API using proper User-Agent headers and 2024 AFL data
+- **Round Selector**: Added comprehensive round dropdown with all 23 regular season rounds plus finals
+- **Data Clarification**: Updated function names and messaging to accurately reflect use of 2024 AFL data
 
 ### Future Integration Opportunities
 - Database migration to PostgreSQL for production

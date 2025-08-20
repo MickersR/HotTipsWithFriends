@@ -56,9 +56,9 @@ def get_afl_fixtures_api(year: int = 2024, round_num: Optional[int] = None) -> L
         logger.error(f"Error fetching AFL fixtures from API: {str(e)}")
         return get_fallback_fixtures()
 
-def get_all_rounds_2025() -> List[Dict]:
+def get_all_rounds_2024() -> List[Dict]:
     """
-    Get all rounds for 2024 AFL season (using 2024 data as 2025 isn't available yet)
+    Get all rounds for 2024 AFL season
     Returns a list of round dictionaries with round number and name
     """
     try:
@@ -98,7 +98,7 @@ def get_all_rounds_2025() -> List[Dict]:
                     'name': finals_names.get(round_num, f'Finals Week {round_num - 23}')
                 })
         
-        logger.info(f"Found {len(round_list)} rounds for 2025 season")
+        logger.info(f"Found {len(round_list)} rounds for 2024 season")
         return round_list
         
     except Exception as e:

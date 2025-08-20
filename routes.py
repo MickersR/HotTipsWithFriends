@@ -1,7 +1,7 @@
 from flask import render_template, request, jsonify, flash, redirect, url_for
 from app import app, db
 from models import Tip
-from web_scraper import scrape_afl_fixtures, get_afl_fixtures_api, get_all_rounds_2025
+from web_scraper import scrape_afl_fixtures, get_afl_fixtures_api, get_all_rounds_2024
 import json
 import logging
 
@@ -48,7 +48,7 @@ def submit_tips():
     """Display the tip submission form"""
     round_num = request.args.get('round', type=int)
     fixtures = get_afl_fixtures(round_num)
-    rounds = get_all_rounds_2025()
+    rounds = get_all_rounds_2024()
     
     return render_template('submit_tips.html', 
                          fixtures=fixtures, 
@@ -70,7 +70,7 @@ def get_fixtures():
 @app.route('/api/rounds')
 def get_rounds():
     """API endpoint to get all available rounds"""
-    rounds = get_all_rounds_2025()
+    rounds = get_all_rounds_2024()
     return jsonify(rounds)
 
 @app.route('/process-tips', methods=['POST'])
