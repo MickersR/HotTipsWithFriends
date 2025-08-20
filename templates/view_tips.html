@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}View Tips - AFL Tipping App{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <h2 class="display-5">
+                    <i class="fas fa-eye me-3"></i>View Tips
+                </h2>
+                <p class="lead text-muted">
+                    Enter an encrypted tip string and password to view someone's predictions
+                </p>
+            </div>
+
+            <!-- Decryption Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-unlock me-2"></i>Decrypt Tips
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form id="decryptForm">
+                        <div class="mb-3">
+                            <label for="encryptedInput" class="form-label">Encrypted Tips String *</label>
+                            <textarea class="form-control" id="encryptedInput" rows="4" 
+                                    placeholder="Paste the encrypted tips string here..." required></textarea>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="passwordInput" class="form-label">Password *</label>
+                            <input type="password" class="form-control" id="passwordInput" 
+                                   placeholder="Enter the password" required>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-unlock me-2"></i>Decrypt Tips
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Error Section -->
+            <div id="errorSection" class="alert alert-danger mt-4" style="display: none;">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span id="errorMessage"></span>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="card mt-4" style="display: none;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-check-circle me-2"></i>Tips Successfully Decrypted!
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- User Info -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-user me-2"></i>Tipper
+                                    </h6>
+                                    <h4 id="tipperName" class="text-primary"></h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-calendar me-2"></i>Round
+                                    </h6>
+                                    <h4 id="roundInfo" class="text-info"></h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tips Display -->
+                    <h5 class="mb-3">
+                        <i class="fas fa-list me-2"></i>Tips
+                    </h5>
+                    <div id="tipsDisplay" class="row g-3"></div>
+
+                    <!-- Margin Prediction -->
+                    <div class="mt-4" id="marginSection">
+                        <div class="card bg-warning text-dark">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">
+                                    <i class="fas fa-target me-2"></i>Margin Prediction
+                                </h6>
+                                <h4 id="marginPrediction"></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// AFL Fixtures data for display
+const AFL_FIXTURES = [
+    { id: 1, home_team: 'Richmond', away_team: 'Collingwood', venue: 'MCG' },
+    { id: 2, home_team: 'Adelaide', away_team: 'Port Adelaide', venue: 'Adelaide Oval' },
+    { id: 3, home_team: 'Brisbane', away_team: 'Gold Coast', venue: 'Gabba' },
+    { id: 4, home_team: 'Geelong', away_team: 'Carlton', venue: 'GMHBA Stadium' },
+    { id: 5, home_team: 'Western Bulldogs', away_team: 'Melbourne', venue: 'Marvel Stadium' },
+    { id: 6, home_team: 'Sydney', away_team: 'GWS Giants', venue: 'SCG' },
+    { id: 7, home_team: 'West Coast', away_team: 'Fremantle', venue: 'Optus Stadium' },
+    { id: 8, home_team: 'St Kilda', away_team: 'Essendon', venue: 'Marvel Stadium' }
+];
+
+document.getElementById('decryptForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const encryptedString = document.getElementById('encryptedInput').value.trim();
+    const password = document.getElementById('passwordInput').value.trim();
+    
+    if (!encryptedString || !password) {
+        showError('Please enter both the encrypted string and password');
+        return;
+    }
+    
+    try {
+        // Decrypt the tip data
+        const decryptedData = decryptTipData(encryptedString, password);
+        
+        if (decryptedData) {
+            displayTips(decryptedData);
+            hideError();
+        } else {
+            showError('Failed to decrypt tips. Please check your password and encrypted string.');
+        }
+    } catch (error) {
+        console.error('Decryption error:', error);
+        showError('Invalid encrypted string or password. Please check your inputs.');
+    }
+});
+
+function displayTips(tipData) {
+    // Display user info
+    document.getElementById('tipperName').textContent = tipData.user_name;
+    document.getElementById('roundInfo').textContent = tipData.round || 'Round 24';
+    
+    // Display tips
+    const tipsContainer = document.getElementById('tipsDisplay');
+    tipsContainer.innerHTML = '';
+    
+    Object.entries(tipData.tips).forEach(([gameId, selectedTeam]) => {
+        const fixture = AFL_FIXTURES.find(f => f.id == gameId);
+        if (fixture) {
+            const tipCard = document.createElement('div');
+            tipCard.className = 'col-lg-6';
+            tipCard.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <div class="text-center">
+                            <small class="text-muted d-block mb-2">
+                                <i class="fas fa-map-marker-alt me-1"></i>${fixture.venue}
+                            </small>
+                            <div class="mb-2">
+                                <span class="badge ${selectedTeam === fixture.home_team ? 'bg-success' : 'bg-secondary'} me-1">
+                                    ${fixture.home_team}
+                                </span>
+                                <span class="text-muted">vs</span>
+                                <span class="badge ${selectedTeam === fixture.away_team ? 'bg-success' : 'bg-secondary'} ms-1">
+                                    ${fixture.away_team}
+                                </span>
+                            </div>
+                            <div class="text-success fw-bold">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Tipped: ${selectedTeam}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            tipsContainer.appendChild(tipCard);
+        }
+    });
+    
+    // Display margin prediction
+    if (tipData.margin) {
+        document.getElementById('marginPrediction').textContent = `${tipData.margin} points`;
+        document.getElementById('marginSection').style.display = 'block';
+    } else {
+        document.getElementById('marginSection').style.display = 'none';
+    }
+    
+    // Show results
+    document.getElementById('resultsSection').style.display = 'block';
+    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+function showError(message) {
+    document.getElementById('errorMessage').textContent = message;
+    document.getElementById('errorSection').style.display = 'block';
+    document.getElementById('resultsSection').style.display = 'none';
+}
+
+function hideError() {
+    document.getElementById('errorSection').style.display = 'none';
+}
+</script>
+{% endblock %}

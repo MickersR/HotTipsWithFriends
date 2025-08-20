@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Tips - AFL Tipping App{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <h2 class="display-5">
+                    <i class="fas fa-edit me-3"></i>Submit Your Tips
+                </h2>
+                <p class="lead text-muted">
+                    Select your winning teams and enter a margin prediction
+                </p>
+            </div>
+
+            <!-- Tip Submission Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">Round 24 - AFL Fixtures</h4>
+                </div>
+                <div class="card-body">
+                    <form id="tipForm">
+                        <!-- User Details -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="userName" class="form-label">Your Name *</label>
+                                <input type="text" class="form-control" id="userName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="password" class="form-label">Password for Encryption *</label>
+                                <input type="password" class="form-control" id="password" required>
+                                <div class="form-text">This password will be needed to decrypt your tips</div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- AFL Fixtures -->
+                        <h5 class="mb-3">
+                            <i class="fas fa-calendar-alt me-2"></i>Select Your Tips
+                        </h5>
+                        
+                        <div class="row g-3" id="fixturesContainer">
+                            {% for fixture in fixtures %}
+                            <div class="col-lg-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <small class="text-muted">
+                                                <i class="fas fa-map-marker-alt me-1"></i>{{ fixture.venue }}
+                                            </small>
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock me-1"></i>{{ fixture.date }} {{ fixture.time }}
+                                            </small>
+                                        </div>
+                                        
+                                        <div class="text-center">
+                                            <div class="btn-group w-100" role="group">
+                                                <input type="radio" class="btn-check" name="tip_{{ fixture.id }}" 
+                                                       id="home_{{ fixture.id }}" value="{{ fixture.home_team }}">
+                                                <label class="btn btn-outline-primary" for="home_{{ fixture.id }}">
+                                                    {{ fixture.home_team }}
+                                                </label>
+                                                
+                                                <input type="radio" class="btn-check" name="tip_{{ fixture.id }}" 
+                                                       id="away_{{ fixture.id }}" value="{{ fixture.away_team }}">
+                                                <label class="btn btn-outline-primary" for="away_{{ fixture.id }}">
+                                                    {{ fixture.away_team }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Margin Prediction -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="margin" class="form-label">
+                                    <i class="fas fa-target me-2"></i>Margin Prediction for Final Game
+                                </label>
+                                <input type="number" class="form-control" id="margin" min="1" max="100" 
+                                       placeholder="Enter margin (1-100 points)">
+                                <div class="form-text">
+                                    Predict the winning margin for {{ fixtures[-1].home_team }} vs {{ fixtures[-1].away_team }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-lock me-2"></i>Generate Encrypted Tips
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="card mt-4" style="display: none;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-check-circle me-2"></i>Tips Successfully Encrypted!
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Your tips have been encrypted. Share the string below along with your password to let others view your predictions.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="encryptedString" class="form-label">
+                            <strong>Encrypted Tips String:</strong>
+                        </label>
+                        <div class="input-group">
+                            <textarea class="form-control" id="encryptedString" rows="4" readonly></textarea>
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard()">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Important:</strong> Share both the encrypted string above and your password with anyone who wants to view your tips.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('tipForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const userName = document.getElementById('userName').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const margin = document.getElementById('margin').value;
+    
+    if (!userName || !password) {
+        alert('Please enter your name and password');
+        return;
+    }
+    
+    // Collect tips
+    const tips = {};
+    const tipInputs = document.querySelectorAll('input[type="radio"]:checked');
+    
+    if (tipInputs.length === 0) {
+        alert('Please select at least one tip');
+        return;
+    }
+    
+    tipInputs.forEach(input => {
+        const gameId = input.name.replace('tip_', '');
+        tips[gameId] = input.value;
+    });
+    
+    try {
+        const response = await fetch('/process-tips', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_name: userName,
+                password: password,
+                tips: tips,
+                margin: margin
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Encrypt the tip data
+            const encryptedString = encryptTipData(result.tip_data, password);
+            
+            // Show results
+            document.getElementById('encryptedString').value = encryptedString;
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            // Scroll to results
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while processing your tips');
+    }
+});
+
+function copyToClipboard() {
+    const textarea = document.getElementById('encryptedString');
+    textarea.select();
+    document.execCommand('copy');
+    
+    // Show feedback
+    const button = event.target.closest('button');
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i>';
+    button.classList.remove('btn-outline-secondary');
+    button.classList.add('btn-success');
+    
+    setTimeout(() => {
+        button.innerHTML = originalHTML;
+        button.classList.remove('btn-success');
+        button.classList.add('btn-outline-secondary');
+    }, 2000);
+}
+</script>
+{% endblock %}
