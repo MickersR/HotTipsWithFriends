@@ -221,3 +221,127 @@ footer {
         color: black !important;
     }
 }
+
+/* AFL Team Theme Selector Styles */
+.team-theme-btn {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px !important;
+    min-height: 80px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+}
+
+.team-theme-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.team-theme-btn:hover::before {
+    opacity: 1;
+}
+
+.team-theme-btn.active {
+    box-shadow: 0 0 0 3px var(--afl-accent);
+    transform: scale(1.02);
+}
+
+.color-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: inline-block;
+}
+
+/* Enhanced theming with CSS custom properties */
+:root {
+    --team-primary: var(--afl-primary);
+    --team-secondary: var(--afl-secondary);
+    --team-accent: var(--afl-accent);
+}
+
+/* Theme-aware component overrides */
+.bg-primary {
+    background-color: var(--team-primary) !important;
+}
+
+.btn-primary {
+    background-color: var(--team-primary);
+    border-color: var(--team-primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--team-secondary);
+    border-color: var(--team-secondary);
+}
+
+.text-primary {
+    color: var(--team-primary) !important;
+}
+
+.border-primary {
+    border-color: var(--team-primary) !important;
+}
+
+/* Hero section with team theming */
+.hero-section .card {
+    background: linear-gradient(135deg, var(--team-primary) 0%, var(--team-secondary) 100%) !important;
+}
+
+/* Alert styling with team colors */
+.alert-success {
+    background: linear-gradient(135deg, var(--team-primary) 0%, var(--team-secondary) 100%);
+    border: none;
+    color: white;
+}
+
+/* Form focus states with team colors */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--team-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--team-primary-rgb, 0, 102, 204), 0.25);
+}
+
+/* Navigation theming */
+.navbar-nav .nav-link:hover {
+    color: var(--team-accent) !important;
+}
+
+/* Responsive adjustments for theme selector */
+@media (max-width: 768px) {
+    .team-theme-btn {
+        min-height: 70px;
+    }
+    
+    .color-indicator {
+        width: 10px;
+        height: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .team-theme-btn {
+        min-height: 60px;
+        font-size: 0.8rem;
+    }
+    
+    .team-theme-btn .fw-bold {
+        font-size: 0.75rem;
+    }
+}
+
+/* Smooth transitions for all theme changes */
+* {
+    transition-property: background-color, border-color, color, box-shadow;
+    transition-duration: 0.3s;
+    transition-timing-function: ease;
+}
