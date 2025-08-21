@@ -1,7 +1,7 @@
 from flask import render_template, request, jsonify, flash, redirect, url_for
 from app import app, db
 from models import Tip
-from web_scraper import scrape_afl_fixtures, get_afl_fixtures_api, get_all_rounds_2024
+from web_scraper import scrape_afl_fixtures, get_afl_fixtures_api, get_all_rounds_2024, get_all_rounds_2025, scrape_afl_2025_fixtures
 import json
 import logging
 from datetime import datetime
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 _afl_fixtures_cache = None
 _cache_timestamp = None
 
-def get_afl_fixtures(round_num=None):
+def get_afl_fixtures(round_num=None, year=2025):
     """Get AFL fixtures with caching"""
     global _afl_fixtures_cache, _cache_timestamp
     
@@ -20,7 +20,7 @@ def get_afl_fixtures(round_num=None):
     
     # If requesting specific round, always fetch fresh
     if round_num:
-        return get_afl_fixtures_api(2024, round_num)
+        return get_afl_fixtures_api(year, round_num)
     
     # Check if cache is valid (refresh every 12 hours)
     now = datetime.now()
@@ -29,8 +29,8 @@ def get_afl_fixtures(round_num=None):
             return _afl_fixtures_cache
     
     # Fetch fresh data from API
-    logger.info("Fetching fresh AFL fixtures from API")
-    fixtures = get_afl_fixtures_api()
+    logger.info(f"Fetching fresh AFL fixtures from API for {year}")
+    fixtures = get_afl_fixtures_api(year)
     
     if fixtures:
         _afl_fixtures_cache = fixtures
@@ -48,13 +48,20 @@ def index():
 def submit_tips():
     """Display the tip submission form"""
     round_num = request.args.get('round', type=int)
-    fixtures = get_afl_fixtures(round_num)
-    rounds = get_all_rounds_2024()
+    year = request.args.get('year', default=2025, type=int)
+    
+    fixtures = get_afl_fixtures(round_num, year)
+    
+    if year == 2025:
+        rounds = get_all_rounds_2025()
+    else:
+        rounds = get_all_rounds_2024()
     
     return render_template('submit_tips.html', 
                          fixtures=fixtures, 
                          rounds=rounds, 
-                         selected_round=round_num)
+                         selected_round=round_num,
+                         selected_year=year)
 
 @app.route('/view-tips')
 def view_tips():
@@ -65,14 +72,27 @@ def view_tips():
 def get_fixtures():
     """API endpoint to get current AFL fixtures"""
     round_num = request.args.get('round', type=int)
-    fixtures = get_afl_fixtures(round_num)
+    year = request.args.get('year', default=2025, type=int)
+    fixtures = get_afl_fixtures(round_num, year)
     return jsonify(fixtures)
 
 @app.route('/api/rounds')
 def get_rounds():
     """API endpoint to get all available rounds"""
-    rounds = get_all_rounds_2024()
+    year = request.args.get('year', default=2025, type=int)
+    
+    if year == 2025:
+        rounds = get_all_rounds_2025()
+    else:
+        rounds = get_all_rounds_2024()
+    
     return jsonify(rounds)
+
+@app.route('/api/fixtures-2025')
+def get_2025_fixtures():
+    """API endpoint to get 2025 AFL fixtures"""
+    fixtures = scrape_afl_2025_fixtures()
+    return jsonify(fixtures)
 
 @app.route('/process-tips', methods=['POST'])
 def process_tips():
@@ -104,6 +124,7 @@ def process_tips():
             'tips': tips,
             'margin': margin,
             'round': data.get('round', 'Current Round'),
+            'year': data.get('year', 2025),
             'created_at': timestamp
         }
         

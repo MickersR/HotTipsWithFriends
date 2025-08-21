@@ -61,9 +61,12 @@ Preferred communication style: Simple, everyday language.
 ### Recent Changes (August 2025)
 - **Removed Feature Marketing**: Cleaned up home page by removing feature advertisements and "How It Works" sections per user request
 - **Implemented Live Data**: Replaced mock AFL fixtures with real Squiggle API integration after web scraping failed
-- **API Integration**: Successfully integrated with Squiggle API using proper User-Agent headers and 2024 AFL data
+- **API Integration**: Successfully integrated with Squiggle API using proper User-Agent headers
 - **Round Selector**: Added comprehensive round dropdown with all 23 regular season rounds plus finals
-- **Data Clarification**: Updated function names and messaging to accurately reflect use of 2024 AFL data
+- **2025 Season Data**: Updated app to use 2025 AFL fixtures as default, discovered Squiggle API has current season data available
+- **Multi-Year Support**: Added year selector allowing users to choose between 2024 and 2025 AFL seasons
+- **Enhanced Timestamp System**: Implemented UTC timestamp storage with browser timezone display and relative time formatting
+- **Improved Data Structure**: Added year information to encrypted tip data for proper fixture matching when viewing tips
 
 ### Future Integration Opportunities
 - Database migration to PostgreSQL for production

@@ -121,18 +121,27 @@
 {% block scripts %}
 <script>
 // AFL Fixtures data loaded from API
-let AFL_FIXTURES = [];
+let AFL_FIXTURES = {};
 
-// Load fixtures from API on page load
+// Load fixtures from both years on page load
 document.addEventListener('DOMContentLoaded', async function() {
     try {
-        const response = await fetch('/api/fixtures');
-        const fixtures = await response.json();
-        AFL_FIXTURES = fixtures;
+        // Load fixtures from both 2024 and 2025
+        const [response2024, response2025] = await Promise.all([
+            fetch('/api/fixtures?year=2024'),
+            fetch('/api/fixtures?year=2025')
+        ]);
+        
+        const fixtures2024 = await response2024.json();
+        const fixtures2025 = await response2025.json();
+        
+        AFL_FIXTURES[2024] = fixtures2024;
+        AFL_FIXTURES[2025] = fixtures2025;
+        
     } catch (error) {
         console.error('Error loading fixtures:', error);
-        // Fallback to empty array if API fails
-        AFL_FIXTURES = [];
+        // Fallback to empty arrays if API fails
+        AFL_FIXTURES = {2024: [], 2025: []};
     }
 });
 
@@ -180,8 +189,12 @@ function displayTips(tipData) {
     const tipsContainer = document.getElementById('tipsDisplay');
     tipsContainer.innerHTML = '';
     
+    // Determine year from tipData or default to 2025
+    const tipYear = tipData.year || 2025;
+    const fixtures = AFL_FIXTURES[tipYear] || AFL_FIXTURES[2025] || [];
+    
     Object.entries(tipData.tips).forEach(([gameId, selectedTeam]) => {
-        const fixture = AFL_FIXTURES.find(f => f.id == gameId);
+        const fixture = fixtures.find(f => f.id == gameId);
         if (fixture) {
             const tipCard = document.createElement('div');
             tipCard.className = 'col-lg-6';
