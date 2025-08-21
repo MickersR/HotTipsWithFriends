@@ -94,9 +94,9 @@ def process_tips():
         if not tips:
             return jsonify({'error': 'At least one tip must be selected'}), 400
         
-        # Get current timestamp
-        current_time = datetime.now()
-        timestamp = current_time.strftime('%Y-%m-%d %H:%M:%S')
+        # Get current timestamp in UTC with timezone info
+        current_time = datetime.utcnow()
+        timestamp = current_time.strftime('%Y-%m-%d %H:%M:%S UTC')
         
         # Prepare tip data for encryption
         tip_data = {

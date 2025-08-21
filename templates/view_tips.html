@@ -240,16 +240,26 @@ function formatTimestamp(timestamp) {
     if (!timestamp) return 'Unknown';
     
     try {
-        const date = new Date(timestamp);
+        // Parse timestamp (handle both UTC and local formats)
+        let date;
+        if (timestamp.includes('UTC')) {
+            // Parse UTC timestamp and convert to local time
+            const utcString = timestamp.replace(' UTC', '');
+            date = new Date(utcString + 'Z'); // Add Z to indicate UTC
+        } else {
+            date = new Date(timestamp);
+        }
+        
         const now = new Date();
         const diffMs = now - date;
         const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
         
-        // Format options
+        // Format options with timezone
         const timeOptions = { 
             hour: '2-digit', 
             minute: '2-digit',
-            hour12: true 
+            hour12: true,
+            timeZoneName: 'short'
         };
         const dateOptions = { 
             day: 'numeric', 
@@ -257,19 +267,22 @@ function formatTimestamp(timestamp) {
             year: 'numeric' 
         };
         
+        // Get user's timezone
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        
         if (diffDays === 0) {
-            // Today - show "Today at HH:MM AM/PM"
-            return `Today at ${date.toLocaleTimeString('en-US', timeOptions)}`;
+            // Today - show "Today at HH:MM AM/PM PST"
+            return `Today at ${date.toLocaleTimeString(undefined, timeOptions)}`;
         } else if (diffDays === 1) {
-            // Yesterday - show "Yesterday at HH:MM AM/PM"
-            return `Yesterday at ${date.toLocaleTimeString('en-US', timeOptions)}`;
+            // Yesterday - show "Yesterday at HH:MM AM/PM PST"
+            return `Yesterday at ${date.toLocaleTimeString(undefined, timeOptions)}`;
         } else if (diffDays < 7) {
-            // This week - show "Monday at HH:MM AM/PM"
-            const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-            return `${dayName} at ${date.toLocaleTimeString('en-US', timeOptions)}`;
+            // This week - show "Monday at HH:MM AM/PM PST"
+            const dayName = date.toLocaleDateString(undefined, { weekday: 'long' });
+            return `${dayName} at ${date.toLocaleTimeString(undefined, timeOptions)}`;
         } else {
-            // Older - show "Jan 15, 2024 at HH:MM AM/PM"
-            return `${date.toLocaleDateString('en-US', dateOptions)} at ${date.toLocaleTimeString('en-US', timeOptions)}`;
+            // Older - show "Jan 15, 2024 at HH:MM AM/PM PST"
+            return `${date.toLocaleDateString(undefined, dateOptions)} at ${date.toLocaleTimeString(undefined, timeOptions)}`;
         }
     } catch (error) {
         console.error('Error formatting timestamp:', error);
