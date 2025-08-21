@@ -226,6 +226,11 @@ document.getElementById('tipForm').addEventListener('submit', async function(e) 
         tips[gameId] = input.value;
     });
     
+    // Get selected round information
+    const roundSelector = document.getElementById('roundSelector');
+    const selectedRoundNumber = roundSelector.value;
+    const selectedRoundText = roundSelector.options[roundSelector.selectedIndex].text;
+    
     try {
         const response = await fetch('/process-tips', {
             method: 'POST',
@@ -236,7 +241,9 @@ document.getElementById('tipForm').addEventListener('submit', async function(e) 
                 user_name: userName,
                 password: password,
                 tips: tips,
-                margin: margin
+                margin: margin,
+                round: selectedRoundText || 'Current Round',
+                round_number: selectedRoundNumber
             })
         });
         

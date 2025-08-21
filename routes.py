@@ -4,6 +4,7 @@ from models import Tip
 from web_scraper import scrape_afl_fixtures, get_afl_fixtures_api, get_all_rounds_2024
 import json
 import logging
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -93,13 +94,17 @@ def process_tips():
         if not tips:
             return jsonify({'error': 'At least one tip must be selected'}), 400
         
+        # Get current timestamp
+        current_time = datetime.now()
+        timestamp = current_time.strftime('%Y-%m-%d %H:%M:%S')
+        
         # Prepare tip data for encryption
         tip_data = {
             'user_name': user_name,
             'tips': tips,
             'margin': margin,
-            'round': 'Round 24',  # Current round
-            'created_at': '2025-08-20'
+            'round': data.get('round', 'Current Round'),
+            'created_at': timestamp
         }
         
         return jsonify({

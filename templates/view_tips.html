@@ -82,6 +82,16 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-clock me-2"></i>Created
+                                    </h6>
+                                    <h4 id="timestampInfo" class="text-white"></h4>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Tips Display -->
@@ -158,6 +168,14 @@ function displayTips(tipData) {
     document.getElementById('tipperName').textContent = tipData.user_name;
     document.getElementById('roundInfo').textContent = tipData.round || 'Round 24';
     
+    // Display timestamp
+    const timestampElement = document.getElementById('timestampInfo');
+    if (tipData.created_at) {
+        timestampElement.textContent = formatTimestamp(tipData.created_at);
+    } else {
+        timestampElement.textContent = 'Unknown';
+    }
+    
     // Display tips
     const tipsContainer = document.getElementById('tipsDisplay');
     tipsContainer.innerHTML = '';
@@ -216,6 +234,47 @@ function showError(message) {
 
 function hideError() {
     document.getElementById('errorSection').style.display = 'none';
+}
+
+function formatTimestamp(timestamp) {
+    if (!timestamp) return 'Unknown';
+    
+    try {
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        
+        // Format options
+        const timeOptions = { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+        };
+        const dateOptions = { 
+            day: 'numeric', 
+            month: 'short', 
+            year: 'numeric' 
+        };
+        
+        if (diffDays === 0) {
+            // Today - show "Today at HH:MM AM/PM"
+            return `Today at ${date.toLocaleTimeString('en-US', timeOptions)}`;
+        } else if (diffDays === 1) {
+            // Yesterday - show "Yesterday at HH:MM AM/PM"
+            return `Yesterday at ${date.toLocaleTimeString('en-US', timeOptions)}`;
+        } else if (diffDays < 7) {
+            // This week - show "Monday at HH:MM AM/PM"
+            const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+            return `${dayName} at ${date.toLocaleTimeString('en-US', timeOptions)}`;
+        } else {
+            // Older - show "Jan 15, 2024 at HH:MM AM/PM"
+            return `${date.toLocaleDateString('en-US', dateOptions)} at ${date.toLocaleTimeString('en-US', timeOptions)}`;
+        }
+    } catch (error) {
+        console.error('Error formatting timestamp:', error);
+        return timestamp; // Return original if formatting fails
+    }
 }
 </script>
 {% endblock %}
