@@ -198,8 +198,9 @@ function applyTeamTheme(teamKey) {
         }, 150);
     }
     
-    // Save theme preference
-    localStorage.setItem('aflTheme', teamKey);
+    // Save theme preference with new key names
+    localStorage.setItem('aflTippingTheme', teamKey);
+    localStorage.setItem('aflTippingThemeData', JSON.stringify(team));
     
     // Show success message
     showThemeMessage(`${team.name} theme applied!`);
@@ -224,8 +225,10 @@ function resetTheme() {
         btn.classList.remove('active');
     });
     
-    // Clear saved preference
-    localStorage.removeItem('aflTheme');
+    // Clear saved preferences
+    localStorage.removeItem('aflTheme'); // Old key
+    localStorage.removeItem('aflTippingTheme');
+    localStorage.removeItem('aflTippingThemeData');
     
     // Hide theme indicator
     const indicator = document.getElementById('themeIndicator');
@@ -247,7 +250,21 @@ function updateThemeIndicator(teamName, teamColor) {
 }
 
 function loadSavedTheme() {
-    const savedTheme = localStorage.getItem('aflTheme');
+    // Try new key first, then fall back to old key
+    let savedTheme = localStorage.getItem('aflTippingTheme');
+    if (!savedTheme) {
+        savedTheme = localStorage.getItem('aflTheme'); // Legacy support
+        if (savedTheme) {
+            // Migrate to new format
+            const team = aflTeams[savedTheme];
+            if (team) {
+                localStorage.setItem('aflTippingTheme', savedTheme);
+                localStorage.setItem('aflTippingThemeData', JSON.stringify(team));
+                localStorage.removeItem('aflTheme'); // Remove old key
+            }
+        }
+    }
+    
     if (savedTheme && aflTeams[savedTheme]) {
         applyTeamThemeColors(savedTheme);
         
@@ -274,10 +291,18 @@ function applyTeamThemeColors(teamKey) {
     root.style.setProperty('--bs-info', team.accent);
     root.style.setProperty('--bs-info-rgb', hexToRgb(team.accent));
     
-    // Custom theme variables
+    // Custom theme variables (same as inline script)
+    root.style.setProperty('--afl-primary', team.primary);
+    root.style.setProperty('--afl-secondary', team.secondary);
+    root.style.setProperty('--afl-accent', team.accent);
+    
+    // Legacy theme variables
     root.style.setProperty('--team-primary', team.primary);
     root.style.setProperty('--team-secondary', team.secondary);
     root.style.setProperty('--team-accent', team.accent);
+    
+    // Mark as theme loaded
+    root.classList.add('theme-loaded');
     
     // Update theme indicator in navigation
     updateThemeIndicator(team.name, team.primary);

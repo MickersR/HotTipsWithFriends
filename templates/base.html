@@ -16,6 +16,30 @@
     
     <!-- CryptoJS for client-side encryption -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <!-- Apply saved theme immediately to prevent flash -->
+    <script>
+    (function() {
+        try {
+            const savedTheme = localStorage.getItem('aflTippingTheme');
+            if (savedTheme && savedTheme !== 'default') {
+                const themeData = JSON.parse(localStorage.getItem('aflTippingThemeData'));
+                if (themeData) {
+                    // Apply theme colors immediately
+                    const root = document.documentElement;
+                    root.style.setProperty('--afl-primary', themeData.primary);
+                    root.style.setProperty('--afl-secondary', themeData.secondary);
+                    root.style.setProperty('--afl-accent', themeData.accent);
+                    
+                    // Add theme class to body
+                    document.documentElement.classList.add('theme-loaded');
+                }
+            }
+        } catch (e) {
+            // Silently fail if localStorage is not available
+        }
+    })();
+    </script>
 </head>
 <body>
     <!-- Navigation -->
