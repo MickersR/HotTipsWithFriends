@@ -1,8 +1,8 @@
-# AFL Tipping App
+# Hot Tips with Friends
 
 ## Overview
 
-An AFL (Australian Football League) tipping application that allows users to submit and share match predictions securely. The app enables users to select winning teams for AFL fixtures, add margin predictions, and encrypt their tips with a password for secure sharing. Built with Flask and featuring client-side encryption for privacy protection.
+An AFL (Australian Football League) tipping application called "Hot Tips with Friends" that allows users to submit and share match predictions securely. The app enables users to select winning teams for AFL fixtures, add margin predictions, and encrypt their tips with a password for secure sharing. Built with Flask and featuring client-side encryption for privacy protection.
 
 ## User Preferences
 
