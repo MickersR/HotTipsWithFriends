@@ -282,6 +282,80 @@ def get_all_rounds_2025() -> List[Dict]:
         # Return basic round structure as fallback
         return [{'number': i, 'name': f'Round {i}'} for i in range(1, 24)]
 
+def load_manual_fixtures() -> List[Dict]:
+    """
+    Load AFL fixtures from manual JSON file
+    """
+    try:
+        import json
+        import os
+        
+        json_file = 'manual_fixtures_2025.json'
+        
+        if not os.path.exists(json_file):
+            logger.warning("Manual fixtures file not found, using API fallback")
+            return []
+        
+        with open(json_file, 'r') as f:
+            data = json.load(f)
+        
+        fixtures = []
+        fixture_id = 1
+        
+        for round_data in data.get('rounds', []):
+            round_number = round_data.get('number', 1)
+            round_name = round_data.get('name', f'Round {round_number}')
+            
+            for fixture in round_data.get('fixtures', []):
+                fixture_data = {
+                    'id': fixture.get('id', fixture_id),
+                    'home_team': fixture.get('home_team', 'TBA'),
+                    'away_team': fixture.get('away_team', 'TBA'),
+                    'venue': fixture.get('venue', 'TBA'),
+                    'date': fixture.get('date', '2025-03-15'),
+                    'time': fixture.get('time', '15:00'),
+                    'round': round_name
+                }
+                fixtures.append(fixture_data)
+                fixture_id += 1
+        
+        logger.info(f"Loaded {len(fixtures)} fixtures from manual file")
+        return fixtures
+        
+    except Exception as e:
+        logger.error(f"Error loading manual fixtures: {str(e)}")
+        return []
+
+def get_manual_rounds() -> List[Dict]:
+    """
+    Get rounds from manual JSON file
+    """
+    try:
+        import json
+        import os
+        
+        json_file = 'manual_fixtures_2025.json'
+        
+        if not os.path.exists(json_file):
+            return []
+        
+        with open(json_file, 'r') as f:
+            data = json.load(f)
+        
+        rounds = []
+        for round_data in data.get('rounds', []):
+            rounds.append({
+                'number': round_data.get('number', 1),
+                'name': round_data.get('name', f'Round {round_data.get("number", 1)}')
+            })
+        
+        logger.info(f"Loaded {len(rounds)} rounds from manual file")
+        return rounds
+        
+    except Exception as e:
+        logger.error(f"Error loading manual rounds: {str(e)}")
+        return []
+
 def get_afl_fixtures_api(year: int = 2025, round_num: Optional[int] = None) -> List[Dict]:
     """
     Get AFL fixtures from Squiggle API

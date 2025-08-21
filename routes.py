@@ -1,7 +1,7 @@
 from flask import render_template, request, jsonify, flash, redirect, url_for
 from app import app, db
 from models import Tip
-from web_scraper import scrape_afl_fixtures, get_afl_fixtures_api, get_all_rounds_2024, get_all_rounds_2025, scrape_afl_2025_fixtures
+from web_scraper import scrape_afl_fixtures, get_afl_fixtures_api, get_all_rounds_2024, get_all_rounds_2025, scrape_afl_2025_fixtures, load_manual_fixtures, get_manual_rounds
 import json
 import logging
 from datetime import datetime
@@ -13,12 +13,22 @@ _afl_fixtures_cache = None
 _cache_timestamp = None
 
 def get_afl_fixtures(round_num=None, year=2025):
-    """Get AFL fixtures with caching"""
+    """Get AFL fixtures with caching - tries manual file first for 2025"""
     global _afl_fixtures_cache, _cache_timestamp
     
     from datetime import datetime, timedelta
     
-    # If requesting specific round, always fetch fresh
+    # For 2025, try manual fixtures first
+    if year == 2025:
+        manual_fixtures = load_manual_fixtures()
+        if manual_fixtures:
+            # Filter by round if specified
+            if round_num:
+                filtered_fixtures = [f for f in manual_fixtures if f.get('round') == f'Round {round_num}']
+                return filtered_fixtures if filtered_fixtures else manual_fixtures[:9]  # Return first 9 if no match
+            return manual_fixtures
+    
+    # If requesting specific round from API, always fetch fresh
     if round_num:
         return get_afl_fixtures_api(year, round_num)
     
@@ -53,7 +63,9 @@ def submit_tips():
     fixtures = get_afl_fixtures(round_num, year)
     
     if year == 2025:
-        rounds = get_all_rounds_2025()
+        # Try manual rounds first
+        manual_rounds = get_manual_rounds()
+        rounds = manual_rounds if manual_rounds else get_all_rounds_2025()
     else:
         rounds = get_all_rounds_2024()
     
@@ -82,7 +94,9 @@ def get_rounds():
     year = request.args.get('year', default=2025, type=int)
     
     if year == 2025:
-        rounds = get_all_rounds_2025()
+        # Try manual rounds first
+        manual_rounds = get_manual_rounds()
+        rounds = manual_rounds if manual_rounds else get_all_rounds_2025()
     else:
         rounds = get_all_rounds_2024()
     

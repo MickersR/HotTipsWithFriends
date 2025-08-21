@@ -1,0 +1,97 @@
+{
+  "season": 2025,
+  "rounds": [
+    {
+      "number": 1,
+      "name": "Round 1",
+      "fixtures": [
+        {
+          "id": 1,
+          "home_team": "Richmond",
+          "away_team": "Carlton",
+          "venue": "MCG",
+          "date": "2025-03-13",
+          "time": "19:30"
+        },
+        {
+          "id": 2,
+          "home_team": "Adelaide",
+          "away_team": "Port Adelaide",
+          "venue": "Adelaide Oval",
+          "date": "2025-03-14",
+          "time": "16:40"
+        },
+        {
+          "id": 3,
+          "home_team": "Brisbane",
+          "away_team": "Sydney",
+          "venue": "Gabba",
+          "date": "2025-03-15",
+          "time": "14:20"
+        },
+        {
+          "id": 4,
+          "home_team": "Collingwood",
+          "away_team": "Melbourne",
+          "venue": "MCG",
+          "date": "2025-03-15",
+          "time": "16:40"
+        },
+        {
+          "id": 5,
+          "home_team": "Geelong",
+          "away_team": "St Kilda",
+          "venue": "GMHBA Stadium",
+          "date": "2025-03-16",
+          "time": "13:20"
+        },
+        {
+          "id": 6,
+          "home_team": "Western Bulldogs",
+          "away_team": "Hawthorn",
+          "venue": "Marvel Stadium",
+          "date": "2025-03-16",
+          "time": "15:40"
+        },
+        {
+          "id": 7,
+          "home_team": "West Coast",
+          "away_team": "Fremantle",
+          "venue": "Optus Stadium",
+          "date": "2025-03-16",
+          "time": "18:10"
+        },
+        {
+          "id": 8,
+          "home_team": "GWS Giants",
+          "away_team": "Essendon",
+          "venue": "GIANTS Stadium",
+          "date": "2025-03-16",
+          "time": "19:30"
+        },
+        {
+          "id": 9,
+          "home_team": "North Melbourne",
+          "away_team": "Gold Coast",
+          "venue": "Marvel Stadium",
+          "date": "2025-03-17",
+          "time": "13:20"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "name": "Round 2",
+      "fixtures": [
+        {
+          "id": 10,
+          "home_team": "Carlton",
+          "away_team": "Western Bulldogs",
+          "venue": "MCG",
+          "date": "2025-03-20",
+          "time": "19:30"
+        }
+      ]
+    }
+  ]
+}
