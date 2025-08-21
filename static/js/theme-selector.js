@@ -112,8 +112,13 @@ const aflTeams = {
 
 // Initialize theme selector on page load
 document.addEventListener('DOMContentLoaded', function() {
-    initializeThemeSelector();
+    // Always load saved theme first (for all pages)
     loadSavedTheme();
+    
+    // Only initialize selector if on home page
+    if (document.getElementById('teamThemeSelector')) {
+        initializeThemeSelector();
+    }
 });
 
 function initializeThemeSelector() {
@@ -176,23 +181,10 @@ function applyTeamTheme(teamKey) {
     const team = aflTeams[teamKey];
     if (!team) return;
     
-    // Apply CSS custom properties for theming
-    const root = document.documentElement;
+    // Apply the colors
+    applyTeamThemeColors(teamKey);
     
-    // Update Bootstrap color variables
-    root.style.setProperty('--bs-primary', team.primary);
-    root.style.setProperty('--bs-primary-rgb', hexToRgb(team.primary));
-    root.style.setProperty('--bs-secondary', team.secondary);
-    root.style.setProperty('--bs-secondary-rgb', hexToRgb(team.secondary));
-    root.style.setProperty('--bs-info', team.accent);
-    root.style.setProperty('--bs-info-rgb', hexToRgb(team.accent));
-    
-    // Custom theme variables
-    root.style.setProperty('--team-primary', team.primary);
-    root.style.setProperty('--team-secondary', team.secondary);
-    root.style.setProperty('--team-accent', team.accent);
-    
-    // Update active state
+    // Update active state (only if selector exists)
     document.querySelectorAll('.team-theme-btn').forEach(btn => {
         btn.classList.remove('active');
     });
@@ -235,14 +227,60 @@ function resetTheme() {
     // Clear saved preference
     localStorage.removeItem('aflTheme');
     
+    // Hide theme indicator
+    const indicator = document.getElementById('themeIndicator');
+    if (indicator) {
+        indicator.style.display = 'none';
+    }
+    
     showThemeMessage('Default theme restored!');
+}
+
+function updateThemeIndicator(teamName, teamColor) {
+    const indicator = document.getElementById('themeIndicator');
+    if (indicator) {
+        indicator.textContent = teamName;
+        indicator.style.backgroundColor = teamColor;
+        indicator.style.color = getContrastColor(teamColor);
+        indicator.style.display = 'inline-block';
+    }
 }
 
 function loadSavedTheme() {
     const savedTheme = localStorage.getItem('aflTheme');
     if (savedTheme && aflTeams[savedTheme]) {
-        applyTeamTheme(savedTheme);
+        applyTeamThemeColors(savedTheme);
+        
+        // Only update UI state if selector exists
+        const activeButton = document.querySelector(`[data-team="${savedTheme}"]`);
+        if (activeButton) {
+            activeButton.classList.add('active');
+        }
     }
+}
+
+function applyTeamThemeColors(teamKey) {
+    const team = aflTeams[teamKey];
+    if (!team) return;
+    
+    // Apply CSS custom properties for theming
+    const root = document.documentElement;
+    
+    // Update Bootstrap color variables
+    root.style.setProperty('--bs-primary', team.primary);
+    root.style.setProperty('--bs-primary-rgb', hexToRgb(team.primary));
+    root.style.setProperty('--bs-secondary', team.secondary);
+    root.style.setProperty('--bs-secondary-rgb', hexToRgb(team.secondary));
+    root.style.setProperty('--bs-info', team.accent);
+    root.style.setProperty('--bs-info-rgb', hexToRgb(team.accent));
+    
+    // Custom theme variables
+    root.style.setProperty('--team-primary', team.primary);
+    root.style.setProperty('--team-secondary', team.secondary);
+    root.style.setProperty('--team-accent', team.accent);
+    
+    // Update theme indicator in navigation
+    updateThemeIndicator(team.name, team.primary);
 }
 
 function getContrastColor(hex) {

@@ -316,6 +316,43 @@ footer {
     color: var(--team-accent) !important;
 }
 
+.navbar-dark .navbar-brand {
+    color: var(--team-primary) !important;
+}
+
+/* Apply team colors to all buttons */
+.btn-outline-primary {
+    color: var(--team-primary);
+    border-color: var(--team-primary);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--team-primary);
+    border-color: var(--team-primary);
+}
+
+/* Form elements theming */
+.form-check-input:checked {
+    background-color: var(--team-primary);
+    border-color: var(--team-primary);
+}
+
+/* Card headers with team colors */
+.card .card-header {
+    background: linear-gradient(135deg, var(--team-primary) 0%, var(--team-secondary) 100%);
+    color: white;
+}
+
+/* Team selection styling updates */
+.team-selection.selected {
+    background-color: var(--team-primary) !important;
+    border-color: var(--team-primary) !important;
+}
+
+.team-selection:hover {
+    border-color: var(--team-primary) !important;
+}
+
 /* Responsive adjustments for theme selector */
 @media (max-width: 768px) {
     .team-theme-btn {
